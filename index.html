@@ -22,7 +22,6 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      transition: all 0.3s ease;
     }
 
     h1 {
@@ -127,15 +126,17 @@
     // List of bad fragments to base usernames on (Roblox might not allow these)
     const badFragments = [
       'ass', 'nig', 'shit', 'fck', 'dlx', 'fag', '88', 'hh', 'kk', '4f', '666', 
-      'fckr', 'bitch', 'dick', 'fist', 'cunt', 'cum', 'pussy', 'lmao', 'lmfao', 'gay'
+      'fckr', 'bitch', 'dick', 'fist', 'cunt', 'cum', 'pussy', 'gay', 'tit', 'cock'
     ];
+
+    const bannedWords = ['lmao', 'lmfao', 'tit'];
 
     let selectedStyle = '';  // Track the user-selected style for generating future usernames
 
     // Function to generate 5 random variations of a username (4 characters max)
     function generateRandomVariations() {
       const variations = [];
-      const baseWord = badFragments[Math.floor(Math.random() * badFragments.length)];
+      const baseWord = getValidBaseWord();
 
       for (let i = 0; i < 5; i++) {
         let username = baseWord + randomChar();
@@ -174,6 +175,16 @@
       document.getElementById('embed').style.display = 'block';
     }
 
+    // Function to get a valid base word (ensures no banned words are included)
+    function getValidBaseWord() {
+      let baseWord;
+      do {
+        baseWord = badFragments[Math.floor(Math.random() * badFragments.length)];
+      } while (bannedWords.some(word => baseWord.includes(word)));  // Exclude bad fragments like "lmao", "tit"
+
+      return baseWord;
+    }
+
     // Function to generate 5 random variations of a username and display them as buttons
     function generateUsername() {
       // Show loading spinner
@@ -201,7 +212,7 @@
         // Hide loading spinner and enable button again
         document.getElementById('loading-spinner').style.display = 'none';
         document.getElementById('generate-btn').disabled = false;
-      }, 1500); // Simulate a delay in generating usernames (1.5s)
+      }, 500); // Speeding up the process, no artificial delay
     }
   </script>
 
