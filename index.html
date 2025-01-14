@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Username Generator with User ID</title>
+  <title>AI-based Username Generator</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -43,6 +43,10 @@
       margin-top: 30px;
       font-size: 18px;
       color: #1e90ff;
+      background-color: #1f1f1f;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
     }
 
     button:focus {
@@ -53,20 +57,22 @@
 </head>
 <body>
 
-  <h1>Username Generator with User ID</h1>
-  <p>Click the button to generate a random valid username and fetch the user ID, profile link, and last online time.</p>
+  <h1>AI-based Username Generator</h1>
+  <p>Click the button to generate a random AI-like username and fetch the user ID, profile link, and last online time.</p>
 
   <button onclick="generateUsername()">Generate Username</button>
 
-  <div class="result" id="result"></div>
-  <div class="embed" id="embed"></div>
-  <div class="user-id" id="user-id"></div>
-  <div class="profile-link" id="profile-link"></div>
-  <div class="last-online" id="last-online"></div>
+  <div class="embed" id="embed" style="display:none;">
+    <h3>Generated Username Info:</h3>
+    <p id="result">Generated Username: </p>
+    <p id="user-id">User Name: </p>
+    <p id="profile-link">Profile Link: </p>
+    <p id="last-online">Last Online: </p>
+  </div>
 
   <script>
-    // List of bad words or fragments that should appear in the username
-    const badFragments = ['ass', 'nig', 'shit', 'fck', 'dlx', 'fag'];
+    // List of bad word fragments to base usernames on
+    const badFragments = ['ass', 'nig', 'shit', 'fck', 'dlx', 'fag', '88', 'hh', 'kk', '4f', '666'];
 
     // Function to generate a random valid username (4 characters)
     function generateRandomUsername() {
@@ -76,29 +82,8 @@
       // Randomly select a bad word fragment to base the username on
       const wordToUse = badFragments[Math.floor(Math.random() * badFragments.length)];
 
-      // Replace letters with similar-looking numbers if needed
-      switch (wordToUse) {
-        case 'ass':
-          username = 'ass' + randomChar();
-          break;
-        case 'nig':
-          username = 'nig' + randomChar();
-          break;
-        case 'shit':
-          username = '5hit'; // Replace 's' with '5'
-          break;
-        case 'fck':
-          username = 'f9ck'; // Replace '9' with '9'
-          break;
-        case 'dlx':
-          username = 'dlx';
-          break;
-        case 'fag':
-          username = 'fag';
-          break;
-        default:
-          username = wordToUse + randomChar(); // Randomize the last character to ensure 4 characters
-      }
+      // Create a random username based on the bad word fragment
+      username = wordToUse + randomChar();
 
       // Ensure the username is exactly 4 characters long and doesn't start with an underscore
       if (username.length !== length || username[0] === '_') {
@@ -114,6 +99,7 @@
       return chars.charAt(Math.floor(Math.random() * chars.length));
     }
 
+    // Function to get user data from the backend (e.g., user ID, profile link, last online)
     async function getUserData(username) {
       try {
         const response = await fetch('/api/get-user-id', {
@@ -132,31 +118,38 @@
             const profileLink = `https://www.roblox.com/users/${userId}/profile`;
             const lastOnline = data.lastOnline;
 
+            document.getElementById('result').innerText = `Generated Username: ${username}`;
             document.getElementById('user-id').innerText = `User Name: ${userName}`;
             document.getElementById('profile-link').innerHTML = `Profile Link: <a href="${profileLink}" target="_blank">${profileLink}</a>`;
             document.getElementById('last-online').innerText = `Last Online: ${lastOnline}`;
+
+            // Show the embed after data is fetched
+            document.getElementById('embed').style.display = 'block';
           } else {
+            document.getElementById('result').innerText = "Generated Username: " + username;
             document.getElementById('user-id').innerText = "User not found or banned.";
             document.getElementById('profile-link').innerText = "";
             document.getElementById('last-online').innerText = "";
+            document.getElementById('embed').style.display = 'block';
           }
         } else {
           console.log('Error fetching user data');
           document.getElementById('user-id').innerText = "Error fetching user data.";
           document.getElementById('profile-link').innerText = "";
           document.getElementById('last-online').innerText = "";
+          document.getElementById('embed').style.display = 'block';
         }
       } catch (error) {
         console.error("Error:", error);
         document.getElementById('user-id').innerText = "Error fetching user data.";
         document.getElementById('profile-link').innerText = "";
         document.getElementById('last-online').innerText = "";
+        document.getElementById('embed').style.display = 'block';
       }
     }
 
     function generateUsername() {
       const randomUsername = generateRandomUsername();
-      document.getElementById('result').innerText = `Generated Username: ${randomUsername}`;
       getUserData(randomUsername);
     }
   </script>
