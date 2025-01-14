@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Roblox Rare 4C User Reset</title>
+  <title>Username Generator with User ID</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -56,7 +56,7 @@
   <h1>Username Generator with User ID</h1>
   <p>Click the button to generate a random valid username and fetch the user ID, profile link, and last online time.</p>
 
-  <button onclick="generateUsername()">Generate Acc</button>
+  <button onclick="generateUsername()">Generate Username</button>
 
   <div class="result" id="result"></div>
   <div class="embed" id="embed"></div>
@@ -65,29 +65,53 @@
   <div class="last-online" id="last-online"></div>
 
   <script>
-    const restrictedWords = ['fuck', 'ass', 'bitch', 'dick', 'cock', 'pimp', 'whore', 'slut', 'damn', 'shit'];
+    // List of bad words or fragments that should appear in the username
+    const badFragments = ['ass', 'nig', 'shit', 'fck', 'dlx', 'fag'];
 
-    // Function to generate a random valid username (3-20 characters, letters, numbers, one underscore)
+    // Function to generate a random valid username (4 characters)
     function generateRandomUsername() {
-      const allowedCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_';
+      const length = 4; // Username length must be 4
       let username = '';
-      
-      // Ensure that the username length is between 3 and 20 characters
-      const length = Math.floor(Math.random() * (20 - 3 + 1)) + 3;
-      
-      // Add letters, numbers, and an underscore
-      for (let i = 0; i < length; i++) {
-        const randomChar = allowedCharacters.charAt(Math.floor(Math.random() * allowedCharacters.length));
-        username += randomChar;
+
+      // Randomly select a bad word fragment to base the username on
+      const wordToUse = badFragments[Math.floor(Math.random() * badFragments.length)];
+
+      // Replace letters with similar-looking numbers if needed
+      switch (wordToUse) {
+        case 'ass':
+          username = 'ass' + randomChar();
+          break;
+        case 'nig':
+          username = 'nig' + randomChar();
+          break;
+        case 'shit':
+          username = '5hit'; // Replace 's' with '5'
+          break;
+        case 'fck':
+          username = 'f9ck'; // Replace '9' with '9'
+          break;
+        case 'dlx':
+          username = 'dlx';
+          break;
+        case 'fag':
+          username = 'fag';
+          break;
+        default:
+          username = wordToUse + randomChar(); // Randomize the last character to ensure 4 characters
       }
-      
-      // Ensure the username contains only one underscore
-      if (username.split('_').length > 2) {
-        username = username.replace(/_/g, '');
-        username = username.substring(0, length - 1) + '_'; // Add one underscore at the end
+
+      // Ensure the username is exactly 4 characters long and doesn't start with an underscore
+      if (username.length !== length || username[0] === '_') {
+        return generateRandomUsername();  // Recursively try again if it doesn't fit
       }
 
       return username;
+    }
+
+    // Helper function to get a random character (letter or number) for obfuscation
+    function randomChar() {
+      const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      return chars.charAt(Math.floor(Math.random() * chars.length));
     }
 
     async function getUserData(username) {
