@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI-based Username Generator</title>
+  <title>Username Generator</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -33,20 +33,24 @@
       transform: scale(1.1);
     }
 
-    .result, .user-id, .profile-link, .last-online {
+    .embed {
       margin-top: 20px;
       font-size: 20px;
-      color: #bb86fc;
-    }
-
-    .embed {
-      margin-top: 30px;
-      font-size: 18px;
       color: #1e90ff;
       background-color: #1f1f1f;
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+    }
+
+    .embed a {
+      color: #bb86fc;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .embed a:hover {
+      text-decoration: underline;
     }
 
     button:focus {
@@ -57,26 +61,27 @@
 </head>
 <body>
 
-  <h1>AI-based Username Generator</h1>
-  <p>Click the button to generate a random AI-like username and fetch the user ID, profile link, and last online time.</p>
+  <h1>Random Bypass Username Generator</h1>
+  <p>Click the button to generate a random bypass username and view the link.</p>
 
   <button onclick="generateUsername()">Generate Username</button>
 
   <div class="embed" id="embed" style="display:none;">
-    <h3>Generated Username Info:</h3>
-    <p id="result">Generated Username: </p>
-    <p id="user-id">User Name: </p>
-    <p id="profile-link">Profile Link: </p>
-    <p id="last-online">Last Online: </p>
+    <h3>Generated Username:</h3>
+    <p id="generated-username"></p>
+    <p id="profile-link"></p>
   </div>
 
   <script>
-    // List of bad word fragments to base usernames on
-    const badFragments = ['ass', 'nig', 'shit', 'fck', 'dlx', 'fag', '88', 'hh', 'kk', '4f', '666'];
+    // List of fragments and patterns that can be seen as inappropriate or bypassed words
+    const badFragments = [
+      'ass', 'nig', 'shit', 'fck', 'dlx', 'fag', '88', 'hh', 'kk', '4f', '666', 
+      'fckr', 'bitch', 'dick', 'fist', 'cunt', 'cum', 'pussy', 'lmao', 'lmfao', 'gay'
+    ];
 
-    // Function to generate a random valid username (4 characters)
+    // Function to generate a random bypass username (4-5 characters)
     function generateRandomUsername() {
-      const length = 4; // Username length must be 4
+      const length = 4 + Math.floor(Math.random() * 2); // Randomize length (4 or 5 characters)
       let username = '';
 
       // Randomly select a bad word fragment to base the username on
@@ -85,72 +90,36 @@
       // Create a random username based on the bad word fragment
       username = wordToUse + randomChar();
 
-      // Ensure the username is exactly 4 characters long and doesn't start with an underscore
-      if (username.length !== length || username[0] === '_') {
+      // Ensure the username is between 4-5 characters long and doesn't start with an underscore
+      if (username.length < 4 || username.length > 5 || username[0] === '_') {
         return generateRandomUsername();  // Recursively try again if it doesn't fit
       }
 
       return username;
     }
 
-    // Helper function to get a random character (letter or number) for obfuscation
+    // Helper function to get a random character (letter or number)
     function randomChar() {
       const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
       return chars.charAt(Math.floor(Math.random() * chars.length));
     }
 
-    // Function to get user data from the backend (e.g., user ID, profile link, last online)
-    async function getUserData(username) {
-      try {
-        const response = await fetch('/api/get-user-id', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ username }),
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data.userId) {
-            const userId = data.userId;
-            const userName = data.userName;
-            const profileLink = `https://www.roblox.com/users/${userId}/profile`;
-            const lastOnline = data.lastOnline;
-
-            document.getElementById('result').innerText = `Generated Username: ${username}`;
-            document.getElementById('user-id').innerText = `User Name: ${userName}`;
-            document.getElementById('profile-link').innerHTML = `Profile Link: <a href="${profileLink}" target="_blank">${profileLink}</a>`;
-            document.getElementById('last-online').innerText = `Last Online: ${lastOnline}`;
-
-            // Show the embed after data is fetched
-            document.getElementById('embed').style.display = 'block';
-          } else {
-            document.getElementById('result').innerText = "Generated Username: " + username;
-            document.getElementById('user-id').innerText = "User not found or banned.";
-            document.getElementById('profile-link').innerText = "";
-            document.getElementById('last-online').innerText = "";
-            document.getElementById('embed').style.display = 'block';
-          }
-        } else {
-          console.log('Error fetching user data');
-          document.getElementById('user-id').innerText = "Error fetching user data.";
-          document.getElementById('profile-link').innerText = "";
-          document.getElementById('last-online').innerText = "";
-          document.getElementById('embed').style.display = 'block';
-        }
-      } catch (error) {
-        console.error("Error:", error);
-        document.getElementById('user-id').innerText = "Error fetching user data.";
-        document.getElementById('profile-link').innerText = "";
-        document.getElementById('last-online').innerText = "";
-        document.getElementById('embed').style.display = 'block';
-      }
+    // Function to generate the user profile link
+    function generateProfileLink(username) {
+      return `https://rblx.trade/u/${username}`;
     }
 
+    // Function to display the generated username and profile link in the embed
     function generateUsername() {
       const randomUsername = generateRandomUsername();
-      getUserData(randomUsername);
+      const profileLink = generateProfileLink(randomUsername);
+
+      // Update the embed content
+      document.getElementById('generated-username').innerText = `Username: ${randomUsername}`;
+      document.getElementById('profile-link').innerHTML = `Profile Link: <a href="${profileLink}" target="_blank">${profileLink}</a>`;
+
+      // Show the embed
+      document.getElementById('embed').style.display = 'block';
     }
   </script>
 
