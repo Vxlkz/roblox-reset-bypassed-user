@@ -145,9 +145,9 @@
 <body>
 
   <h1>AI Username Suggestion Box with Iframe</h1>
-  <p>Enter a string (up to 4 characters) to generate bypass-style usernames inside an iframe.</p>
+  <p>Enter any string, and we’ll convert it to a bypassed 4-character username inside an iframe.</p>
 
-  <input type="text" id="input-box" maxlength="4" placeholder="Enter username...">
+  <input type="text" id="input-box" placeholder="Enter username...">
   <button id="generate-btn" onclick="generateSuggestions()">Generate Suggestions</button>
 
   <div id="error-message" class="error-message"></div>
@@ -159,23 +159,16 @@
   </div>
 
   <script>
-    // List of characters allowed in the username (excluding _ at the start)
-    const allowedChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_';
-
     // List of bad fragments to base bypass-style usernames on
     const badFragments = ['ass', 'nig', 'shit', 'fck', 'dlx', 'fag', '88', '666', 'bitch', 'dick', 'fist', 'cunt', 'cum', 'pussy', 'gay', 'tit'];
 
     // Validate input string
     function validateInput(input) {
-      const regex = /^[a-zA-Z0-9_]+$/;
-      if (input.length === 0 || input.length > 4) {
-        return 'Input should be between 1 and 4 characters long.';
+      if (input.length === 0) {
+        return 'Input cannot be empty.';
       }
-      if (input[0] === '_') {
-        return 'Username cannot start with an underscore ("_").';
-      }
-      if (!regex.test(input)) {
-        return 'Only characters a-z, A-Z, 0-9, and _ are allowed.';
+      if (input.length > 10) {
+        return 'Input is too long. We will truncate it to 4 characters.';
       }
       return null;
     }
@@ -195,8 +188,11 @@
       // Generate suggestions based on input string
       const suggestions = [];
       for (let i = 0; i < 5; i++) {
-        const randomFragment = badFragments[Math.floor(Math.random() * badFragments.length)];
-        let suggestion = input + randomFragment.substring(0, 4 - input.length); // Ensure 4 chars max
+        let suggestion = input.substring(0, 4); // Truncate the string to 4 characters
+        if (suggestion.length < 4) {
+          const randomFragment = badFragments[Math.floor(Math.random() * badFragments.length)];
+          suggestion += randomFragment.substring(0, 4 - suggestion.length); // Ensure we get exactly 4 characters
+        }
         suggestions.push(suggestion);
       }
 
