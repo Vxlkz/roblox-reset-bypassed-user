@@ -76,6 +76,34 @@
       cursor: not-allowed;
     }
 
+    .suggestions {
+      margin-top: 20px;
+      padding: 20px;
+      background-color: #333;
+      border-radius: 10px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.7);
+      color: #FFFFFF;
+      font-size: 1.1rem;
+      text-align: left;
+      width: 300px;
+      display: none; /* Initially hidden */
+    }
+
+    .suggestions p {
+      cursor: pointer;
+      padding: 10px;
+      border: 2px solid #6200EA;
+      border-radius: 8px;
+      margin: 5px 0;
+      background-color: #1f1f1f;
+      transition: background-color 0.3s, transform 0.3s ease;
+    }
+
+    .suggestions p:hover {
+      background-color: #3700B3;
+      transform: scale(1.05);
+    }
+
     .iframe-container {
       margin-top: 20px;
       padding: 20px;
@@ -124,6 +152,8 @@
 
   <div id="error-message" class="error-message"></div>
 
+  <div id="suggestions-box" class="suggestions"></div>
+
   <div id="iframe-container" class="iframe-container">
     <iframe id="username-iframe"></iframe>
   </div>
@@ -166,22 +196,37 @@
       const suggestions = [];
       for (let i = 0; i < 5; i++) {
         const randomFragment = badFragments[Math.floor(Math.random() * badFragments.length)];
-        const suggestion = input + randomFragment.substring(0, 4 - input.length) + randomChar();
+        let suggestion = input + randomFragment.substring(0, 4 - input.length); // Ensure 4 chars max
         suggestions.push(suggestion);
       }
 
-      // Display the first suggestion in the iframe
-      displayIframe(suggestions[0]);
+      // Display suggestions in the box
+      displaySuggestions(suggestions);
     }
 
-    // Function to generate a random character
-    function randomChar() {
-      const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-      return chars.charAt(Math.floor(Math.random() * chars.length));
+    // Function to display generated suggestions
+    function displaySuggestions(usernames) {
+      const suggestionsBox = document.getElementById('suggestions-box');
+
+      // Clear any previous suggestions
+      suggestionsBox.innerHTML = '';
+
+      // Add each generated username to the suggestions box
+      usernames.forEach(username => {
+        const suggestionElement = document.createElement('p');
+        suggestionElement.innerHTML = `<strong>${username}</strong>`;
+        suggestionElement.onclick = function() {
+          showIframe(username); // Show the iframe when clicked
+        };
+        suggestionsBox.appendChild(suggestionElement);
+      });
+
+      // Show the suggestions box
+      suggestionsBox.style.display = 'block';
     }
 
     // Function to display the username inside the iframe
-    function displayIframe(username) {
+    function showIframe(username) {
       const iframeContainer = document.getElementById('iframe-container');
       const iframe = document.getElementById('username-iframe');
 
