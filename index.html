@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Username Reset Generator</title>
+  <title>AI Username Suggestion Box</title>
   <style>
     * {
       box-sizing: border-box;
@@ -37,6 +37,22 @@
       color: #B0B0B0;
     }
 
+    input {
+      padding: 10px;
+      font-size: 16px;
+      border: 2px solid #6200EA;
+      border-radius: 8px;
+      background-color: #1f1f1f;
+      color: white;
+      margin-bottom: 20px;
+      width: 250px;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #3700B3;
+    }
+
     button {
       padding: 12px 30px;
       font-size: 16px;
@@ -60,16 +76,8 @@
       cursor: not-allowed;
     }
 
-    .buttons-container {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
+    .suggestions {
       margin-top: 20px;
-      gap: 15px;
-    }
-
-    .embed {
-      margin-top: 40px;
       padding: 20px;
       background-color: #333;
       border-radius: 10px;
@@ -77,116 +85,122 @@
       color: #FFFFFF;
       font-size: 1.1rem;
       text-align: left;
+      display: none;
     }
 
-    .embed a {
-      color: #BB86FC;
-      font-weight: bold;
-      text-decoration: none;
-      transition: color 0.3s;
+    .suggestions p {
+      margin: 5px 0;
     }
 
-    .embed a:hover {
-      color: #3700B3;
-      text-decoration: underline;
+    .suggestions button {
+      margin-top: 5px;
+      font-size: 14px;
+      padding: 8px;
     }
 
-    .loading-spinner {
+    .error-message {
+      color: #F44336;
+      font-size: 1.1rem;
       margin-top: 20px;
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #BB86FC;
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      animation: spin 2s linear infinite;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
     }
   </style>
 </head>
 <body>
 
-  <h1>Username Reset Generator</h1>
-  <p>Generate bypass-style usernames (4 characters max) that may violate platform guidelines. Click below to start.</p>
-  <button id="generate-btn" onclick="generateUsername()">Generate Username</button>
+  <h1>AI Username Suggestion Box</h1>
+  <p>Enter a string (up to 4 characters) to generate bypass-style usernames.</p>
 
-  <div id="loading-spinner" class="loading-spinner" style="display:none;"></div>
+  <input type="text" id="input-box" maxlength="4" placeholder="Enter username...">
+  <button id="generate-btn" onclick="generateSuggestions()">Generate Suggestions</button>
 
-  <div id="buttons-container" class="buttons-container" style="display:none;"></div>
+  <div id="error-message" class="error-message"></div>
 
-  <div class="embed" id="embed" style="display:none;">
-    <h3>Generated Username:</h3>
-    <p id="generated-username"></p>
+  <div id="suggestions-box" class="suggestions">
+    <h3>Suggested Usernames:</h3>
+    <div id="suggested-usernames"></div>
   </div>
 
   <script>
-    // List of bad fragments to base usernames on (Roblox might not allow these)
-    const badFragments = [
-      'ass', 'nig', 'shit', 'fck', 'dlx', 'fag', '88', 'hh', 'kk', '4f', '666', 
-      'fckr', 'bitch', 'dick', 'fist', 'cunt', 'cum', 'pussy', 'gay', 'tit', 'cock'
-    ];
+    // List of characters allowed in the username (excluding _ at the start)
+    const allowedChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_';
 
-    const bannedWords = ['lmao', 'lmfao', 'tit'];
+    // List of bad fragments to base bypass-style usernames on
+    const badFragments = ['ass', 'nig', 'shit', 'fck', 'dlx', 'fag', '88', '666', 'bitch', 'dick', 'fist', 'cunt', 'cum', 'pussy', 'gay', 'tit'];
 
-    // Function to generate a single random username (4 characters max)
-    function generateRandomUsername() {
-      const baseWord = getValidBaseWord();
-      let username = baseWord + randomChar();
-
-      // Ensure the username is exactly 4 characters long
-      if (username.length > 4) {
-        username = username.substring(0, 4); // Trim to 4 characters if it exceeds
+    // Validate input string
+    function validateInput(input) {
+      const regex = /^[a-zA-Z0-9_]+$/;
+      if (input.length === 0 || input.length > 4) {
+        return 'Input should be between 1 and 4 characters long.';
       }
-
-      return username;
+      if (input[0] === '_') {
+        return 'Username cannot start with an underscore ("_").';
+      }
+      if (!regex.test(input)) {
+        return 'Only characters a-z, A-Z, 0-9, and _ are allowed.';
+      }
+      return null;
     }
 
-    // Helper function to get a random character (letter or number)
+    // Function to generate bypass-style usernames based on input
+    function generateSuggestions() {
+      const input = document.getElementById('input-box').value.trim();
+      const errorMessage = validateInput(input);
+
+      if (errorMessage) {
+        document.getElementById('error-message').innerText = errorMessage;
+        return;
+      }
+
+      document.getElementById('error-message').innerText = ''; // Clear any previous error
+
+      // Generate suggestions based on input string
+      const suggestions = [];
+      for (let i = 0; i < 5; i++) {
+        const randomFragment = badFragments[Math.floor(Math.random() * badFragments.length)];
+        const suggestion = input + randomFragment.substring(0, 4 - input.length) + randomChar();
+        suggestions.push(suggestion);
+      }
+
+      // Display the suggestions
+      displaySuggestions(suggestions);
+    }
+
+    // Function to generate a random character
     function randomChar() {
       const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
       return chars.charAt(Math.floor(Math.random() * chars.length));
     }
 
-    // Function to get a valid base word (ensures no banned words are included)
-    function getValidBaseWord() {
-      let baseWord;
-      do {
-        baseWord = badFragments[Math.floor(Math.random() * badFragments.length)];
-      } while (bannedWords.some(word => baseWord.includes(word)));  // Exclude bad fragments like "lmao", "tit"
+    // Function to display generated suggestions
+    function displaySuggestions(usernames) {
+      const suggestionsBox = document.getElementById('suggestions-box');
+      const suggestedUsernamesDiv = document.getElementById('suggested-usernames');
 
-      return baseWord;
+      // Clear previous suggestions
+      suggestedUsernamesDiv.innerHTML = '';
+
+      // Add each generated username to the suggestions box
+      usernames.forEach(username => {
+        const suggestion = document.createElement('p');
+        suggestion.innerHTML = `<strong>${username}</strong> <button onclick="copyToClipboard('${username}')">Copy</button>`;
+        suggestedUsernamesDiv.appendChild(suggestion);
+      });
+
+      // Show suggestions box
+      suggestionsBox.style.display = 'block';
     }
 
-    // Function to update the displayed username in the embed after generation
-    function displayUsername(username) {
-      const embed = document.getElementById('generated-username');
-      const url = `http://rblx.trade/u/${username}`;
+    // Function to copy username to clipboard
+    function copyToClipboard(username) {
+      const tempInput = document.createElement('input');
+      document.body.appendChild(tempInput);
+      tempInput.value = username;
+      tempInput.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempInput);
 
-      embed.innerHTML = `Generated Username: <a href="${url}" target="_blank">${username}</a><br>Visit URL: <a href="${url}" target="_blank">${url}</a>`;
-
-      // Show the embed
-      document.getElementById('embed').style.display = 'block';
-    }
-
-    // Function to generate a username and display it as a URL in the embed
-    function generateUsername() {
-      // Show loading spinner
-      document.getElementById('loading-spinner').style.display = 'inline-block';
-      document.getElementById('generate-btn').disabled = true;
-
-      const username = generateRandomUsername();
-
-      // Display the generated username as a URL in the embed
-      setTimeout(() => {
-        displayUsername(username);
-
-        // Hide loading spinner and enable button again
-        document.getElementById('loading-spinner').style.display = 'none';
-        document.getElementById('generate-btn').disabled = false;
-      }, 200);  // Instant generation with minimal delay
+      alert('Username copied to clipboard!');
     }
   </script>
 
