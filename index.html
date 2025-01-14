@@ -37,20 +37,28 @@
       color: #B0B0B0;
     }
 
+    .input-container {
+      margin-bottom: 20px;
+    }
+
     input {
-      padding: 10px;
+      padding: 12px;
       font-size: 16px;
       border: 2px solid #6200EA;
       border-radius: 8px;
       background-color: #1f1f1f;
       color: white;
-      margin-bottom: 20px;
       width: 250px;
+      max-width: 80%;
     }
 
     input:focus {
       outline: none;
       border-color: #3700B3;
+    }
+
+    .btn-container {
+      margin-top: 10px;
     }
 
     button {
@@ -86,7 +94,8 @@
       font-size: 1.1rem;
       text-align: left;
       width: 300px;
-      display: none; /* Initially hidden */
+      max-width: 80%;
+      display: none;
     }
 
     .suggestions p {
@@ -115,13 +124,7 @@
       text-align: center;
       width: 300px;
       height: 100px;
-      display: none; /* Hidden initially */
-      transition: opacity 0.5s ease-in-out;
-      opacity: 0;
-    }
-
-    .iframe-container.show {
-      opacity: 1;
+      display: none;
     }
 
     iframe {
@@ -132,7 +135,6 @@
       color: white;
       font-size: 1.2rem;
       text-align: center;
-      transition: all 0.5s ease;
     }
 
     .error-message {
@@ -147,8 +149,13 @@
   <h1>AI Username Suggestion Box with Iframe</h1>
   <p>Enter any string, and we’ll convert it to a bypassed 4-character username inside an iframe.</p>
 
-  <input type="text" id="input-box" placeholder="Enter username...">
-  <button id="generate-btn" onclick="generateSuggestions()">Generate Suggestions</button>
+  <div class="input-container">
+    <input type="text" id="input-box" placeholder="Enter username..." oninput="validateInput()">
+  </div>
+
+  <div class="btn-container">
+    <button id="generate-btn" onclick="generateSuggestions()">Generate Suggestions</button>
+  </div>
 
   <div id="error-message" class="error-message"></div>
 
@@ -159,40 +166,43 @@
   </div>
 
   <script>
-    // List of bad fragments to base bypass-style usernames on
-    const badFragments = ['ass', 'nig', 'shit', 'fck', 'dlx', 'fag', '88', '666', 'bitch', 'dick', 'fist', 'cunt', 'cum', 'pussy', 'gay', 'tit'];
+    // List of offensive words
+    const offensiveWords = ['fuck', 'nigger', 'bitch', 'cunt', 'pussy', 'ass', 'shit'];
 
-    // Validate input string
-    function validateInput(input) {
+    // Function to validate input (checking for offensive words)
+    function validateInput() {
+      const input = document.getElementById('input-box').value.trim();
+      const errorMessage = document.getElementById('error-message');
+
       if (input.length === 0) {
-        return 'Input cannot be empty.';
+        errorMessage.innerText = 'Input cannot be empty.';
+      } else if (input.length > 10) {
+        errorMessage.innerText = 'Input is too long. It will be truncated to 4 characters.';
+      } else {
+        errorMessage.innerText = '';
       }
-      if (input.length > 10) {
-        return 'Input is too long. We will truncate it to 4 characters.';
-      }
-      return null;
     }
 
-    // Function to generate bypass-style usernames based on input
+    // Function to generate bypassed variations
     function generateSuggestions() {
       const input = document.getElementById('input-box').value.trim();
-      const errorMessage = validateInput(input);
+      const errorMessage = document.getElementById('error-message');
 
-      if (errorMessage) {
-        document.getElementById('error-message').innerText = errorMessage;
+      if (input.length === 0) {
+        errorMessage.innerText = 'Input cannot be empty.';
         return;
       }
 
-      document.getElementById('error-message').innerText = ''; // Clear any previous error
+      if (input.length > 10) {
+        errorMessage.innerText = 'Input is too long. We will truncate it to 4 characters.';
+      } else {
+        errorMessage.innerText = ''; // Clear error message
+      }
 
-      // Generate suggestions based on input string
+      // Handle offensive words
       const suggestions = [];
       for (let i = 0; i < 5; i++) {
-        let suggestion = input.substring(0, 4); // Truncate the string to 4 characters
-        if (suggestion.length < 4) {
-          const randomFragment = badFragments[Math.floor(Math.random() * badFragments.length)];
-          suggestion += randomFragment.substring(0, 4 - suggestion.length); // Ensure we get exactly 4 characters
-        }
+        let suggestion = generateBypassWord(input);
         suggestions.push(suggestion);
       }
 
@@ -200,14 +210,32 @@
       displaySuggestions(suggestions);
     }
 
+    // Function to generate bypassed version of the word
+    function generateBypassWord(word) {
+      let variations = [];
+      if (offensiveWords.includes(word.toLowerCase())) {
+        // Generate variations for offensive words like "fuck" or "nigger"
+        variations = [
+          word.substring(0, 3) + "h",  // Example: fckh, fvck, nggr
+          word.substring(0, 2) + "kc", // Example: fkc, ngr
+          word.substring(0, 2) + "rr", // Example: frr, ngrr
+          word.substring(0, 2) + "vk", // Example: fvk
+          word.substring(0, 2) + "kc", // Example: nkc, nkgr
+        ];
+      } else {
+        // If it's not an offensive word, just take the first 4 characters
+        variations.push(word.substring(0, 4));
+      }
+
+      // Return a random variation
+      return variations[Math.floor(Math.random() * variations.length)];
+    }
+
     // Function to display generated suggestions
     function displaySuggestions(usernames) {
       const suggestionsBox = document.getElementById('suggestions-box');
-
-      // Clear any previous suggestions
       suggestionsBox.innerHTML = '';
 
-      // Add each generated username to the suggestions box
       usernames.forEach(username => {
         const suggestionElement = document.createElement('p');
         suggestionElement.innerHTML = `<strong>${username}</strong>`;
@@ -232,7 +260,7 @@
           <head>
             <style>
               body {
-                background-color: #1f1f1f;
+                background-color: #121212;
                 color: white;
                 font-family: Arial, sans-serif;
                 font-size: 24px;
@@ -251,7 +279,7 @@
       iframe.srcdoc = content;
 
       // Show the iframe with a fade-in effect
-      iframeContainer.classList.add('show');
+      iframeContainer.style.display = 'block';
     }
   </script>
 
