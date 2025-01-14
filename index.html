@@ -76,6 +76,7 @@
       box-shadow: 0 6px 12px rgba(0, 0, 0, 0.7);
       color: #FFFFFF;
       font-size: 1.1rem;
+      text-align: left;
     }
 
     .embed a {
@@ -117,9 +118,8 @@
   <div id="buttons-container" class="buttons-container" style="display:none;"></div>
 
   <div class="embed" id="embed" style="display:none;">
-    <h3>Selected Username:</h3>
-    <p id="generated-username"></p>
-    <p id="profile-link"></p>
+    <h3>Generated Usernames:</h3>
+    <p id="generated-usernames"></p>
   </div>
 
   <script>
@@ -130,8 +130,6 @@
     ];
 
     const bannedWords = ['lmao', 'lmfao', 'tit'];
-
-    let selectedStyle = '';  // Track the user-selected style for generating future usernames
 
     // Function to generate 5 random variations of a username (4 characters max)
     function generateRandomVariations() {
@@ -158,23 +156,6 @@
       return chars.charAt(Math.floor(Math.random() * chars.length));
     }
 
-    // Function to generate the user profile link (simulated)
-    function generateProfileLink(username) {
-      return `https://rblx.trade/u/${username}`;
-    }
-
-    // Function to update the displayed username and profile link after selection
-    function displayUsername(username) {
-      const profileLink = generateProfileLink(username);
-
-      // Update the embed content
-      document.getElementById('generated-username').innerText = `Username: ${username}`;
-      document.getElementById('profile-link').innerHTML = `Profile Link: <a href="${profileLink}" target="_blank">${profileLink}</a>`;
-
-      // Show the embed
-      document.getElementById('embed').style.display = 'block';
-    }
-
     // Function to get a valid base word (ensures no banned words are included)
     function getValidBaseWord() {
       let baseWord;
@@ -185,34 +166,37 @@
       return baseWord;
     }
 
+    // Function to update the displayed usernames in the embed after selection
+    function displayUsernames(usernames) {
+      const embed = document.getElementById('generated-usernames');
+      embed.innerHTML = '';
+
+      usernames.forEach((username) => {
+        const usernameElement = document.createElement('p');
+        usernameElement.innerHTML = `<strong>${username}</strong>`;
+        embed.appendChild(usernameElement);
+      });
+
+      // Show the embed
+      document.getElementById('embed').style.display = 'block';
+    }
+
     // Function to generate 5 random variations of a username and display them as buttons
     function generateUsername() {
       // Show loading spinner
       document.getElementById('loading-spinner').style.display = 'inline-block';
       document.getElementById('generate-btn').disabled = true;
 
+      const variations = generateRandomVariations();
+
+      // Display the generated usernames as text in the embed
       setTimeout(() => {
-        const variations = generateRandomVariations();
-        const buttonsContainer = document.getElementById('buttons-container');
-        buttonsContainer.innerHTML = '';  // Clear previous buttons
-
-        variations.forEach((username) => {
-          const button = document.createElement('button');
-          button.innerText = username;
-          button.onclick = () => {
-            selectedStyle = username;
-            displayUsername(username);  // Display the selected username and profile link
-          };
-          buttonsContainer.appendChild(button);
-        });
-
-        // Display the buttons container
-        document.getElementById('buttons-container').style.display = 'flex';
+        displayUsernames(variations);
 
         // Hide loading spinner and enable button again
         document.getElementById('loading-spinner').style.display = 'none';
         document.getElementById('generate-btn').disabled = false;
-      }, 500); // Speeding up the process, no artificial delay
+      }, 200);  // Instant generation with minimal delay
     }
   </script>
 
