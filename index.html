@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roblox Rare 4C User Reset</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #e0e0e0;
+      text-align: center;
+      padding: 50px;
+    }
+
+    h1, p {
+      color: #ffffff;
+    }
+
+    button {
+      padding: 15px 30px;
+      font-size: 18px;
+      background-color: #6200ea;
+      color: #ffffff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #3700b3;
+      transform: scale(1.1);
+    }
+
+    .result, .user-id, .profile-link, .last-online {
+      margin-top: 20px;
+      font-size: 20px;
+      color: #bb86fc;
+    }
+
+    .embed {
+      margin-top: 30px;
+      font-size: 18px;
+      color: #1e90ff;
+    }
+
+    button:focus {
+      outline: none;
+      box-shadow: 0 0 5px 2px rgba(98, 0, 234, 0.7);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Username Generator with User ID</h1>
+  <p>Click the button to generate a random valid username and fetch the user ID, profile link, and last online time.</p>
+
+  <button onclick="generateUsername()">Generate Acc</button>
+
+  <div class="result" id="result"></div>
+  <div class="embed" id="embed"></div>
+  <div class="user-id" id="user-id"></div>
+  <div class="profile-link" id="profile-link"></div>
+  <div class="last-online" id="last-online"></div>
+
+  <script>
+    const restrictedWords = ['fuck', 'ass', 'bitch', 'dick', 'cock', 'pimp', 'whore', 'slut', 'damn', 'shit'];
+
+    // Function to generate a random valid username (3-20 characters, letters, numbers, one underscore)
+    function generateRandomUsername() {
+      const allowedCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_';
+      let username = '';
+      
+      // Ensure that the username length is between 3 and 20 characters
+      const length = Math.floor(Math.random() * (20 - 3 + 1)) + 3;
+      
+      // Add letters, numbers, and an underscore
+      for (let i = 0; i < length; i++) {
+        const randomChar = allowedCharacters.charAt(Math.floor(Math.random() * allowedCharacters.length));
+        username += randomChar;
+      }
+      
+      // Ensure the username contains only one underscore
+      if (username.split('_').length > 2) {
+        username = username.replace(/_/g, '');
+        username = username.substring(0, length - 1) + '_'; // Add one underscore at the end
+      }
+
+      return username;
+    }
+
+    async function getUserData(username) {
+      try {
+        const response = await fetch('/api/get-user-id', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.userId) {
+            const userId = data.userId;
+            const userName = data.userName;
+            const profileLink = `https://www.roblox.com/users/${userId}/profile`;
+            const lastOnline = data.lastOnline;
+
+            document.getElementById('user-id').innerText = `User Name: ${userName}`;
+            document.getElementById('profile-link').innerHTML = `Profile Link: <a href="${profileLink}" target="_blank">${profileLink}</a>`;
+            document.getElementById('last-online').innerText = `Last Online: ${lastOnline}`;
+          } else {
+            document.getElementById('user-id').innerText = "User not found or banned.";
+            document.getElementById('profile-link').innerText = "";
+            document.getElementById('last-online').innerText = "";
+          }
+        } else {
+          console.log('Error fetching user data');
+          document.getElementById('user-id').innerText = "Error fetching user data.";
+          document.getElementById('profile-link').innerText = "";
+          document.getElementById('last-online').innerText = "";
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        document.getElementById('user-id').innerText = "Error fetching user data.";
+        document.getElementById('profile-link').innerText = "";
+        document.getElementById('last-online').innerText = "";
+      }
+    }
+
+    function generateUsername() {
+      const randomUsername = generateRandomUsername();
+      document.getElementById('result').innerText = `Generated Username: ${randomUsername}`;
+      getUserData(randomUsername);
+    }
+  </script>
+
+</body>
+</html>
