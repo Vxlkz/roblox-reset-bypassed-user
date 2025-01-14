@@ -3,99 +3,152 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Username Generator</title>
+  <title>Username Reset Generator</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #121212;
-      color: #e0e0e0;
-      text-align: center;
-      padding: 50px;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
-    h1, p {
-      color: #ffffff;
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121212;
+      color: #E0E0E0;
+      text-align: center;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      color: #BB86FC;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+
+    p {
+      font-size: 1.1rem;
+      margin-bottom: 40px;
+      color: #B0B0B0;
     }
 
     button {
-      padding: 15px 30px;
-      font-size: 18px;
-      background-color: #6200ea;
-      color: #ffffff;
+      padding: 12px 30px;
+      font-size: 16px;
+      background-color: #6200EA;
+      color: white;
       border: none;
-      border-radius: 5px;
+      border-radius: 8px;
       cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.3s ease;
-    }
-
-    button:hover {
-      background-color: #3700b3;
-      transform: scale(1.1);
-    }
-
-    .embed {
-      margin-top: 20px;
-      font-size: 20px;
-      color: #1e90ff;
-      background-color: #1f1f1f;
-      padding: 20px;
-      border-radius: 10px;
+      transition: background-color 0.3s, transform 0.3s ease;
+      margin: 10px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
     }
 
+    button:hover {
+      background-color: #3700B3;
+      transform: scale(1.05);
+    }
+
+    button:disabled {
+      background-color: #888;
+      cursor: not-allowed;
+    }
+
+    .buttons-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 20px;
+      gap: 15px;
+    }
+
+    .embed {
+      margin-top: 40px;
+      padding: 20px;
+      background-color: #333;
+      border-radius: 10px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.7);
+      color: #FFFFFF;
+      font-size: 1.1rem;
+    }
+
     .embed a {
-      color: #bb86fc;
-      text-decoration: none;
+      color: #BB86FC;
       font-weight: bold;
+      text-decoration: none;
+      transition: color 0.3s;
     }
 
     .embed a:hover {
+      color: #3700B3;
       text-decoration: underline;
     }
 
-    button:focus {
-      outline: none;
-      box-shadow: 0 0 5px 2px rgba(98, 0, 234, 0.7);
+    .loading-spinner {
+      margin-top: 20px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #BB86FC;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 2s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
   </style>
 </head>
 <body>
 
-  <h1>Random Bypass Username Generator</h1>
-  <p>Click the button to generate a random bypass username and view the link.</p>
+  <h1>Username Reset Generator</h1>
+  <p>Generate bypass-style usernames (4 characters max) that may violate platform guidelines. Click below to start.</p>
+  <button id="generate-btn" onclick="generateUsername()">Generate Usernames</button>
 
-  <button onclick="generateUsername()">Generate Username</button>
+  <div id="loading-spinner" class="loading-spinner" style="display:none;"></div>
+
+  <div id="buttons-container" class="buttons-container" style="display:none;"></div>
 
   <div class="embed" id="embed" style="display:none;">
-    <h3>Generated Username:</h3>
+    <h3>Selected Username:</h3>
     <p id="generated-username"></p>
     <p id="profile-link"></p>
   </div>
 
   <script>
-    // List of fragments and patterns that can be seen as inappropriate or bypassed words
+    // List of bad fragments to base usernames on (Roblox might not allow these)
     const badFragments = [
       'ass', 'nig', 'shit', 'fck', 'dlx', 'fag', '88', 'hh', 'kk', '4f', '666', 
       'fckr', 'bitch', 'dick', 'fist', 'cunt', 'cum', 'pussy', 'lmao', 'lmfao', 'gay'
     ];
 
-    // Function to generate a random bypass username (4-5 characters)
-    function generateRandomUsername() {
-      const length = 4 + Math.floor(Math.random() * 2); // Randomize length (4 or 5 characters)
-      let username = '';
+    let selectedStyle = '';  // Track the user-selected style for generating future usernames
 
-      // Randomly select a bad word fragment to base the username on
-      const wordToUse = badFragments[Math.floor(Math.random() * badFragments.length)];
+    // Function to generate 5 random variations of a username (4 characters max)
+    function generateRandomVariations() {
+      const variations = [];
+      const baseWord = badFragments[Math.floor(Math.random() * badFragments.length)];
 
-      // Create a random username based on the bad word fragment
-      username = wordToUse + randomChar();
+      for (let i = 0; i < 5; i++) {
+        let username = baseWord + randomChar();
 
-      // Ensure the username is between 4-5 characters long and doesn't start with an underscore
-      if (username.length < 4 || username.length > 5 || username[0] === '_') {
-        return generateRandomUsername();  // Recursively try again if it doesn't fit
+        // Ensure the username is exactly 4 characters long
+        if (username.length > 4) {
+          username = username.substring(0, 4); // Trim to 4 characters if it exceeds
+        }
+
+        variations.push(username);
       }
 
-      return username;
+      return variations;
     }
 
     // Helper function to get a random character (letter or number)
@@ -104,22 +157,51 @@
       return chars.charAt(Math.floor(Math.random() * chars.length));
     }
 
-    // Function to generate the user profile link
+    // Function to generate the user profile link (simulated)
     function generateProfileLink(username) {
       return `https://rblx.trade/u/${username}`;
     }
 
-    // Function to display the generated username and profile link in the embed
-    function generateUsername() {
-      const randomUsername = generateRandomUsername();
-      const profileLink = generateProfileLink(randomUsername);
+    // Function to update the displayed username and profile link after selection
+    function displayUsername(username) {
+      const profileLink = generateProfileLink(username);
 
       // Update the embed content
-      document.getElementById('generated-username').innerText = `Username: ${randomUsername}`;
+      document.getElementById('generated-username').innerText = `Username: ${username}`;
       document.getElementById('profile-link').innerHTML = `Profile Link: <a href="${profileLink}" target="_blank">${profileLink}</a>`;
 
       // Show the embed
       document.getElementById('embed').style.display = 'block';
+    }
+
+    // Function to generate 5 random variations of a username and display them as buttons
+    function generateUsername() {
+      // Show loading spinner
+      document.getElementById('loading-spinner').style.display = 'inline-block';
+      document.getElementById('generate-btn').disabled = true;
+
+      setTimeout(() => {
+        const variations = generateRandomVariations();
+        const buttonsContainer = document.getElementById('buttons-container');
+        buttonsContainer.innerHTML = '';  // Clear previous buttons
+
+        variations.forEach((username) => {
+          const button = document.createElement('button');
+          button.innerText = username;
+          button.onclick = () => {
+            selectedStyle = username;
+            displayUsername(username);  // Display the selected username and profile link
+          };
+          buttonsContainer.appendChild(button);
+        });
+
+        // Display the buttons container
+        document.getElementById('buttons-container').style.display = 'flex';
+
+        // Hide loading spinner and enable button again
+        document.getElementById('loading-spinner').style.display = 'none';
+        document.getElementById('generate-btn').disabled = false;
+      }, 1500); // Simulate a delay in generating usernames (1.5s)
     }
   </script>
 
