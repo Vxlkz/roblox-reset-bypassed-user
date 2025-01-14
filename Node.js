@@ -1,53 +1,39 @@
-const express = require('express');
-const axios = require('axios');
-const cors = require('cors');
-const app = express();
-const port = 3000;
-
-// Enable CORS for client-side access
-app.use(cors());
-app.use(express.json());  // to parse JSON body from client requests
-
-// POST endpoint to get the user ID based on the username
-app.post('/get-user-id', async (req, res) => {
-  const username = req.body.username;
-
-  // Roblox API endpoint for fetching user ID
-  const url = 'https://users.roblox.com/v1/usernames/users';
-  const requestBody = {
-    'usernames': [username],
-    'excludeBannedUsers': true
-  };
-
+async function getUserData(username) {
   try {
-    const response = await axios.post(url, requestBody, {
+    const response = await fetch('/api/get-user-id', {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
+      },
+      body: JSON.stringify({ username }),
     });
 
-    const userData = response.data;
+    if (response.ok) {
+      const data = await response.json();
+      if (data.userId) {
+        const userId = data.userId;
+        const userName = data.userName;
+        const profileLink = `https://www.roblox.com/users/${userId}/profile`;
+        const lastOnline = data.lastOnline;
 
-    if (userData.data && userData.data.length > 0) {
-      const userId = userData.data[0].id;
-      const userName = userData.data[0].name;
-
-      // Fetch the Last Online time for the user
-      const lastOnlineResponse = await axios.get(`https://rblx.trade/api/v2/users/${userId}/last-online`);
-      const lastOnline = lastOnlineResponse.data.data.last_online;
-
-      res.json({ userId, userName, lastOnline });
+        document.getElementById('user-id').innerText = `User Name: ${userName}`;
+        document.getElementById('profile-link').innerHTML = `Profile Link: <a href="${profileLink}" target="_blank">${profileLink}</a>`;
+        document.getElementById('last-online').innerText = `Last Online: ${lastOnline}`;
+      } else {
+        document.getElementById('user-id').innerText = "User not found or banned.";
+        document.getElementById('profile-link').innerText = "";
+        document.getElementById('last-online').innerText = "";
+      }
     } else {
-      res.status(404).json({ message: 'User not found or banned' });
+      const errorData = await response.json();
+      document.getElementById('user-id').innerText = `Error: ${errorData.message}`;
+      document.getElementById('profile-link').innerText = "";
+      document.getElementById('last-online').innerText = "";
     }
   } catch (error) {
-    console.error('Error fetching user ID:', error);
-    res.status(500).json({ message: 'Error fetching user ID.' });
+    console.error("Error:", error);
+    document.getElementById('user-id').innerText = "Error fetching user data.";
+    document.getElementById('profile-link').innerText = "";
+    document.getElementById('last-online').innerText = "";
   }
-});
-
-// Start the server
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-});
+}
